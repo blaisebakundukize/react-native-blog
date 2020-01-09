@@ -1,10 +1,25 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity } from 'react-native';
 import { Context } from '../context/BlogContext';
 import { Feather } from '@expo/vector-icons';
 
 const IndexScreen = ({ navigation }) => {
-  const { state, deleteBlogPost } = useContext(Context);
+  const { state, deleteBlogPost, getBlogPosts } = useContext(Context);
+
+  useEffect(() => {
+    getBlogPosts();
+
+    // Rerun when get back to this screen
+    const listener = navigation.addListener('didFocus', () => {
+      getBlogPosts();
+    });
+
+    // Return this function when this screen destroyed completely
+    return () => {
+      // Remove the listener once the screen is destroyed 
+      listener.remove();
+    };
+  }, [state]);
 
   return (
     <View style={styles.container}>
@@ -16,7 +31,7 @@ const IndexScreen = ({ navigation }) => {
           return (
             <TouchableOpacity onPress={() => navigation.navigate('Show', { id: item.id })}>
               <View style={styles.row}>
-                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.title}>{item.title} - {item.id}</Text>
                 <TouchableOpacity onPress={() => deleteBlogPost(item.id)}>
                   <Feather style={styles.icon} name="trash" />
                 </TouchableOpacity>
